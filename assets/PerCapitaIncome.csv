@@ -1,4 +1,4 @@
-﻿OBJECTID,GEOID,NAME,B01001_001E,B19313_001E,B19301_001E,ACS_VINTAGE,JURISDICTION,CRA_NO,CRA_GRP,GEN_ALIAS,DETL_NAMES,TRACT_LABEL
+﻿OBJECTID,GEOID,Name,Population,AggregateIncome,PCIAdjusted,ACSVintage,Jurisdiction,CRA_ID,CRAGroup,CRAName,CRANeighborhoods,TractLabel
 1,53033000101,"Census Tract 1.01, King County, Washington",3659,117927500,32229,5Y20,Seattle,8.3,8,Cedar Park/Meadowbrook,"Cedar Park, Lake City, Meadowbrook, Matthews Beach",1.01
 2,53033000102,"Census Tract 1.02, King County, Washington",4539,247427600,54511,5Y20,Seattle,8.3,8,Cedar Park/Meadowbrook,"Cedar Park, Lake City, Meadowbrook, Matthews Beach",1.02
 3,53033000201,"Census Tract 2.01, King County, Washington",4680,283150200,60502,5Y20,Seattle,8.2,8,Olympic Hills/Victory Heights,"Lake City, Victory Heights, Olympic Hills, Pinehurst, Jackson Park",2.01

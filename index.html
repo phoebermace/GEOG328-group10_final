@@ -1,14 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="author" content="Armaan, Phoebe, Amelia, Genchen">
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- Including the Mapbox GL CSS file -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" rel="stylesheet">
+
+  <!-- Including the Mapbox GL JS file -->
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
   <title>Seattle Income & 911 Calls</title>
 </head>
 
 <body>
+  <main id="container">
+
+    <div id="side-panel">
+
+      <h2 id="title">Seattle Income & 911 Calls</h2>
+      <!-- <button onclick="sortTable()">Sort by Date</button> -->
+
+      <table>
+        <tr>
+          <th>IN PROGRESS</th>
+        </tr>
+      </table>
+
+    </div>
+
+    <div id="map"></div>
+  </main>
+
+  <script>
+    // !!! SCRIPT NEEDS MODIFICATION
+    // initialize basemmap
+    mapboxgl.accessToken =
+      'pk.eyJ1IjoiYXplZW0yNCIsImEiOiJjbG93MnNkeTkwdWdpMnJvN2Y5ZXRwazNjIn0.okNOlWQrPErSr8fNahF9VA';
+
+    const map = new mapboxgl.Map({
+      container: 'map', // container ID
+      style: 'mapbox://styles/azeem24/cloovewgp005101r7czzub6bg', // style URL
+      zoom: 11.5, // starting zoom
+      center: [-122.32, 47.6] // starting center
+    });
+
+    async function geojsonFetch() {
+
+      let response = await fetch('assets/filtered911Calls.geojson'); 
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      let calls = await response.json();
+
+      response = await fetch('assets/PCI.geojson');
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      let censusTracts = await response.json();
+
+      var table = document.getElementsByTagName("table");
+      for (let i = 0; i < censusTracts.features.length; i++) {
+        // console.log(censusTracts.features[i].properties.id);
+
+        var lng = await censusTracts.features[i].geometry.coordinates[0];
+        var lat = await censusTracts.features[i].geometry.coordinates[1];
+
+        // Create an empty <tr> element and add it to the 1st position of the table:
+        var row = table[0].insertRow(-1);
+
+        var cell1 = row.insertCell(0);
+        cell1.innerHTML = await censusTracts.features[i].properties.PCIAdjusted;
+
+      }
+
+      map.on('load', () => {
+
+        map.addSource('calls', {
+          type: 'geojson',
+          data: calls
+        });
+
+        map.addLayer({
+          'id': 'calls-layer',
+          'type': 'circle',
+          'source': 'calls',
+          'paint': {
+            'circle-radius': 1,
+            'circle-stroke-width': 0.2,
+            'circle-color': '#64a199',
+            'circle-stroke-color': 'white'
+          }
+        });
+
+        map.addSource('censusTracts', {
+          type: 'geojson',
+          data: censusTracts
+        });
+
+        map.addLayer({
+          'id': 'censusTracts-layer',
+          'type': 'fill',
+          'source': 'censusTracts',
+          'paint': {
+            'fill-color': '#4c6155',
+            'fill-opacity': 0.5
+          }
+        });
+      });
+    }
+
+    geojsonFetch()
+      .catch(e => {
+        console.log('There has been a problem with your fetch operation: ' + e.message);
+      });
+  </script>
 </body>
+
 </html>

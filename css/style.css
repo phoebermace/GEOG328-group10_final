@@ -1,0 +1,52 @@
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+#container {
+  display: flex;
+  height: 100vh;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+#side-panel {
+  flex-basis: 500px;
+  overflow-y: scroll;
+}
+
+#map {
+  flex-grow: 1;
+}
+
+@media (max-width: 1024px) {
+  #side-panel {
+      display: none;
+  }
+}
+
+#title {
+  margin-left: 0.95rem;
+}
+
+button {
+  margin-bottom: 10px;
+  margin-left: 0.95rem;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+  border: 1px solid #ddd;
+}
+
+th, td {
+  text-align: left;
+  padding: 16px;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
