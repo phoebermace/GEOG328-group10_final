@@ -1,16 +1,18 @@
+# Loading required libraries
 library(tidyverse)
 library(sf)
 library(dplyr)
 library(leaflet)
 library(classInt)
 
+# Set working directory
+setwd("/Users/phoebemace/Desktop/school/gis/GEOG328-group10_final/assets")
 
 # Loading in 911 Calls data
-setwd("C:/Users/armvg/Desktop/CLASSES/2023-2024/FALL")
-calls <- read.csv("GEOG 328/GEOG328-group10_final/assets/911calls.csv")
+calls <- read.csv("filtered911Calls.csv")
 
 # Loading in Per Capita Income data
-income <- read.csv("GEOG 328/GEOG328-group10_final/assets/PerCapitaIncome.csv")
+income <- read.csv("PerCapitaIncome.csv")
 
 # Reformatting the 'Datetime' column format for filtering compatibility
 calls$Datetime <- as.POSIXct(strptime(calls$Datetime, format="%m/%d/%Y %I:%M:%S %p"))
@@ -18,16 +20,10 @@ calls$Datetime <- as.POSIXct(strptime(calls$Datetime, format="%m/%d/%Y %I:%M:%S 
 # Filtering the 911 calls dataset to only include the relevant time frame
 lowerThreshold <- as.POSIXct("2022-08-31 00:00:00", format="%Y-%m-%d %H:%M:%S", tz="UTC")
 upperThreshold <- as.POSIXct("2023-08-31 00:00:00", format="%Y-%m-%d %H:%M:%S", tz="UTC")
-
 newCalls <- filter(calls, (calls$Datetime > lowerThreshold & calls$Datetime < upperThreshold))
 
-# Export the new calls dataset
-write.csv(newCalls, "filtered911Calls.csv", row.names = FALSE)
-
-# -----------------------------------------------------------------------------
-
 # Seattle Census Tracts GEOJSON 
-geojson <- st_read("GEOG 328/GEOG328-group10_final/assets/censusTracts.geojson")
+geojson <- st_read("censusTracts.geojson")
 
 # Format Columns
 income$GEOID <- as.character(income$GEOID)
@@ -67,23 +63,29 @@ merged$properties <- purrr::map(1:nrow(merged), function(i) format_properties(me
 # Remove the original "properties" column
 merged <- merged %>% select(-properties)
 
+# Aggregating Per Capita Income data
+merged <- merged %>%
+  group_by(BASENAME, CRAName) %>%
+  summarise(
+    avg_income = mean(PCIAdjusted),
+    total_population = sum(Population))
 
-# Export the new GEOJSON
-st_write(merged, "GEOG 328/GEOG328-group10_final/assets/PCI.geojson", delete_layer = TRUE)
+# Export the new GEOJSON to a temporary file
+temp_file <- tempfile(fileext = ".geojson")
+st_write(merged, temp_file, driver = "GeoJSON", delete_layer = TRUE)
 
-# -----------------------------------------------------------------------------
+# Move the temporary file to replace the original
+file.rename(temp_file, "PCI.geojson")
 
 # Finding PCI Natural Breaks
 
 # Minimum
-
-min <- min(merged$PCIAdjusted)
+min <- min(merged$avg_income)
 
 # Maximum 
-
-max <- max(merged$PCIAdjusted)
+max <- max(merged$avg_income)
 
 # Natural Breaks Scheme
-intervals <- classIntervals(merged$PCIAdjusted, n = 5, style = "jenks")
+intervals <- classIntervals(merged$avg_income, n = 5, style = "jenks")
 breaks <- intervals$brks
 cat("Class Breaks:", breaks, "\n")

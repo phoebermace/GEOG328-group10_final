@@ -49,7 +49,7 @@
   <script>
     // initialize basemmap
     mapboxgl.accessToken =
-      'pk.eyJ1IjoiYXplZW0yNCIsImEiOiJjbG93MnNkeTkwdWdpMnJvN2Y5ZXRwazNjIn0.okNOlWQrPErSr8fNahF9VA';
+      'pk.eyJ1IjoicGhvZWJlbWFjZSIsImEiOiJjbHBiajVteGYwZGx5MnFveWpqNWQ4bWl5In0.hLWt7pwDPj_plteMfRY-uQ';
 
     // map setup
     const map = new mapboxgl.Map({
@@ -92,8 +92,8 @@
         var cell4 = row.insertCell(3);
         cell1.innerHTML = await censusTracts.features[i].properties.CRAName;
         cell2.innerHTML = await censusTracts.features[i].properties.BASENAME;
-        cell3.innerHTML = await censusTracts.features[i].properties.Population;
-        cell4.innerHTML = await censusTracts.features[i].properties.PCIAdjusted;
+        cell3.innerHTML = await censusTracts.features[i].properties.total_population;
+        cell4.innerHTML = await censusTracts.features[i].properties.avg_income;
 
       }
 
@@ -112,7 +112,7 @@
           'paint': {
             'fill-color': [
               'step',
-              ['get', 'PCIAdjusted'],
+              ['get', 'avg_income'],
               '#FFB4B4',
               5000,
               '#E19090',
@@ -126,12 +126,12 @@
               '#6A0000'
             ],
             'fill-outline-color': '#4c6155',
-            'fill-opacity': 0.2,
+            'fill-opacity': .7,
           }
         });
 
         // loading dot density 911 emergency calls layer
-        map.addSource('calls', {
+       map.addSource('calls', {
           type: 'geojson',
           data: calls
         });
@@ -141,10 +141,11 @@
           'type': 'circle',
           'source': 'calls',
           'paint': {
-            'circle-radius': 5,
-            'circle-stroke-width': 1,
-            'circle-color': 'white',
-            'circle-stroke-color': 'black'
+            'circle-radius': 3,
+            'circle-stroke-width': 0.3,
+            'circle-color': '#333333',
+            'circle-stroke-color': '#333333',
+            'circle-opacity': 0.5
           }
         });
 
@@ -184,7 +185,7 @@
           // Add circle for 911 Call
           if (layer === '911 Call') {
             key.innerHTML =
-              '<svg height="10" width="10"><circle cx="5" cy="5" r="5" stroke="black" stroke-width="1" fill="white" /></svg>';
+              '<svg height="10" width="10"><circle cx="5" cy="5" r="3" stroke="#333333" stroke-width="0.3" fill="#333333" /></svg>';
           }
 
           item.appendChild(key);
@@ -206,12 +207,12 @@
 
         if (features.length) {
           const censusTract = features[0].properties;
-          const censusTractName = censusTract.Name;
+          const censusTractName = censusTract.BASENAME;
           const communityName = censusTract.CRAName;
-          const income = censusTract.PCIAdjusted;
+          const income = censusTract.avg_income;
 
           infoContainer.innerHTML =
-            `<h3>${censusTractName}</h3><p><strong>Community:</strong> ${communityName}</p><p><strong>Per Capita Income:</strong> ${income}</p>`;
+            `<h3>Census: ${censusTractName}</h3><p><strong>Community:</strong> ${communityName}</p><p><strong>Per Capita Income:</strong> ${income}</p>`;
         } else {
           infoContainer.innerHTML = `<h3>Hover over a census tract for more information.</h3>`;
         }
