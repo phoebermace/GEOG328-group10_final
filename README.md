@@ -11,7 +11,7 @@ The goal of this project is to implement skills and techniques developed through
 Application URL: https://phoebermace.github.io/GEOG328-group10_final/
 
 ### Map Preview
-![map_preview](img/preview.png)
+![map_preview](img/updatedpreview.png)
 
 ### Main Functions
 - Sorting Table by Per Capita Income
