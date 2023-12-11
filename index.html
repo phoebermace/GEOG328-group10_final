@@ -44,7 +44,7 @@
 
     const map = new mapboxgl.Map({
       container: 'map', // container ID
-      style: 'mapbox://styles/azeem24/cloovewgp005101r7czzub6bg', // style URL
+      style: 'mapbox://styles/azeem24/cloounc71004b01rb6qra9lbl', // style URL
       zoom: 11.5, // starting zoom
       center: [-122.32, 47.6] // starting center
     });
@@ -98,8 +98,23 @@
           'type': 'fill',
           'source': 'censusTracts',
           'paint': {
-            'fill-color': '#4c6155',
-            'fill-opacity': 0.5
+            'fill-color': [
+              'step',
+              ['get', 'PCIAdjusted'],
+              '#FFB4B4',
+              5000,
+              '#E19090',
+              35000,
+              '#C36C6C',
+              60000,
+              '#A54848',
+              80000,
+              '#872424',
+              100000,
+              '#6A0000'
+            ],
+            'fill-outline-color': '#4c6155', // Outline color for the fill
+            'fill-opacity': 0.2
           }
         });
 
@@ -114,15 +129,15 @@
           'source': 'calls',
           'paint': {
             'circle-radius': 1,
-            'circle-stroke-width': 0.2,
-            'circle-color': '#64a199',
+            'circle-stroke-width': 0,
+            'circle-color': '#FFFFFF',
             'circle-stroke-color': 'white'
           }
         });
 
       });
     }
-    
+
 
     geojsonFetch()
       .catch(e => {
