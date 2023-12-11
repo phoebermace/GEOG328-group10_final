@@ -21,11 +21,12 @@
     <div id="side-panel">
 
       <h2 id="title">Seattle Income & 911 Calls</h2>
-      <!-- <button onclick="sortTable()">Sort by Date</button> -->
+      <button onclick="sortTable()">Sort by Income</button>
 
       <table>
         <tr>
           <th>Community Name</th>
+          <th>Census Tract</th>
           <th>Population</th>
           <th>Per Capita Income</th>
         </tr>
@@ -34,14 +35,22 @@
     </div>
 
     <div id="map"></div>
+
+    <div class='map-overlay' id='features'>
+      <div id='text-description'>
+        <h3 id="default">Hover over a census tract for more information.</h3>
+      </div>
+    </div>
+
+    <div class='map-overlay' id='legend'></div>
   </main>
 
   <script>
-    // !!! SCRIPT NEEDS MODIFICATION
     // initialize basemmap
     mapboxgl.accessToken =
       'pk.eyJ1IjoiYXplZW0yNCIsImEiOiJjbG93MnNkeTkwdWdpMnJvN2Y5ZXRwazNjIn0.okNOlWQrPErSr8fNahF9VA';
 
+    // map setup
     const map = new mapboxgl.Map({
       container: 'map', // container ID
       style: 'mapbox://styles/azeem24/cloounc71004b01rb6qra9lbl', // style URL
@@ -74,18 +83,20 @@
         var lng = await censusTracts.features[i].geometry.coordinates[0];
         var lat = await censusTracts.features[i].geometry.coordinates[1];
 
-        // Create an empty <tr> element and add it to the 1st position of the table:
         var row = table[0].insertRow(-1);
 
         var cell1 = row.insertCell(0);
         var cell2 = row.insertCell(1);
         var cell3 = row.insertCell(2);
+        var cell4 = row.insertCell(3);
         cell1.innerHTML = await censusTracts.features[i].properties.CRAName;
-        cell2.innerHTML = await censusTracts.features[i].properties.Population;
-        cell3.innerHTML = await censusTracts.features[i].properties.PCIAdjusted;
+        cell2.innerHTML = await censusTracts.features[i].properties.BASENAME;
+        cell3.innerHTML = await censusTracts.features[i].properties.Population;
+        cell4.innerHTML = await censusTracts.features[i].properties.PCIAdjusted;
 
       }
 
+      // loading chloropleth census tracts layer
       map.on('load', () => {
 
         map.addSource('censusTracts', {
@@ -113,11 +124,12 @@
               100000,
               '#6A0000'
             ],
-            'fill-outline-color': '#4c6155', // Outline color for the fill
-            'fill-opacity': 0.2
+            'fill-outline-color': '#4c6155',
+            'fill-opacity': 0.2,
           }
         });
 
+        // loading dot density 911 emergency calls layer
         map.addSource('calls', {
           type: 'geojson',
           data: calls
@@ -128,21 +140,110 @@
           'type': 'circle',
           'source': 'calls',
           'paint': {
-            'circle-radius': 1,
-            'circle-stroke-width': 0,
-            'circle-color': '#FFFFFF',
-            'circle-stroke-color': 'white'
+            'circle-radius': 5,
+            'circle-stroke-width': 1,
+            'circle-color': 'white',
+            'circle-stroke-color': 'black'
           }
         });
 
-      });
-    }
+        // creating the legend for the chloropleth layer
+        const legend = document.getElementById('legend');
+        const layers = [
+          '0-4999',
+          '5000-34999',
+          '35000-59999',
+          '60000-79999',
+          '80000-99999',
+          '100000-150000'
+        ];
+        const colors = [
+          '#FFB4B470',
+          '#E1909070',
+          '#C36C6C70',
+          '#A5484870',
+          '#87242470',
+          '#6A000070'
+        ];
 
+        legend.innerHTML = "<b>Per Capita Income</b><br><br>";
+
+        layers.forEach((layer, i) => {
+          const color = colors[i];
+          const item = document.createElement('div');
+          const key = document.createElement('span');
+          key.className = 'legend-key';
+          key.style.backgroundColor = color;
+
+          const value = document.createElement('span');
+          value.innerHTML = `${layer}`;
+          item.appendChild(key);
+          item.appendChild(value);
+          legend.appendChild(item);
+        });
+
+      });
+
+      // interactive mouse move event: display information when hovering above census tract
+      map.on('mousemove', ({
+        point
+      }) => {
+        const features = map.queryRenderedFeatures(point, {
+          layers: ['censusTracts-layer']
+        });
+
+        const infoContainer = document.getElementById('text-description');
+
+        if (features.length) {
+          const censusTract = features[0].properties;
+          const censusTractName = censusTract.Name;
+          const communityName = censusTract.CRAName;
+          const income = censusTract.PCIAdjusted;
+
+          infoContainer.innerHTML =
+            `<h3>${censusTractName}</h3><p><strong>Community:</strong> ${communityName}</p><p><strong>Per Capita Income:</strong> ${income}</p>`;
+        } else {
+          infoContainer.innerHTML = `<h3>Hover over a census tract for more information.</h3>`;
+        }
+      });
+
+    }
 
     geojsonFetch()
       .catch(e => {
         console.log('There has been a problem with your fetch operation: ' + e.message);
       });
+
+    // sorting table by per-capita-income
+    function sortTable() {
+      var table, rows, switching, i, x, y, shouldSwitch;
+      table = document.querySelector("table");
+      switching = true;
+      var iteration = 0;
+      var maxIterations = 10000; // Set a reasonable maximum number of iterations
+
+      while (switching && iteration < maxIterations) {
+        iteration++;
+        switching = false;
+        rows = table.rows;
+
+        for (i = 1; i < (rows.length - 1); i++) {
+          shouldSwitch = false;
+          x = parseFloat(rows[i].getElementsByTagName("td")[2].innerHTML);
+          y = parseFloat(rows[i + 1].getElementsByTagName("td")[2].innerHTML);
+
+          if (x > y) {
+            shouldSwitch = true;
+            break;
+          }
+        }
+
+        if (shouldSwitch) {
+          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+          switching = true;
+        }
+      }
+    }
   </script>
 </body>
 
