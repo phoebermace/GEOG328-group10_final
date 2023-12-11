@@ -21,7 +21,8 @@
     <div id="side-panel">
 
       <h2 id="title">Seattle Income & 911 Calls</h2>
-      <button onclick="sortTable()">Sort by Income</button>
+      <button onclick="sortTable(3)">Sort by Income</button>
+      <button onclick="sortTable(2)">Sort by Population</button>
 
       <table>
         <tr>
@@ -155,7 +156,8 @@
           '35000-59999',
           '60000-79999',
           '80000-99999',
-          '100000-150000'
+          '100000-150000',
+          '911 Call'
         ];
         const colors = [
           '#FFB4B470',
@@ -163,7 +165,8 @@
           '#C36C6C70',
           '#A5484870',
           '#87242470',
-          '#6A000070'
+          '#6A000070',
+          '0'
         ];
 
         legend.innerHTML = "<b>Per Capita Income</b><br><br>";
@@ -177,6 +180,13 @@
 
           const value = document.createElement('span');
           value.innerHTML = `${layer}`;
+
+          // Add circle for 911 Call
+          if (layer === '911 Call') {
+            key.innerHTML =
+              '<svg height="10" width="10"><circle cx="5" cy="5" r="5" stroke="black" stroke-width="1" fill="white" /></svg>';
+          }
+
           item.appendChild(key);
           item.appendChild(value);
           legend.appendChild(item);
@@ -215,7 +225,7 @@
       });
 
     // sorting table by per-capita-income
-    function sortTable() {
+    function sortTable(column) {
       var table, rows, switching, i, x, y, shouldSwitch;
       table = document.querySelector("table");
       switching = true;
@@ -229,8 +239,8 @@
 
         for (i = 1; i < (rows.length - 1); i++) {
           shouldSwitch = false;
-          x = parseFloat(rows[i].getElementsByTagName("td")[2].innerHTML);
-          y = parseFloat(rows[i + 1].getElementsByTagName("td")[2].innerHTML);
+          x = parseFloat(rows[i].getElementsByTagName("td")[column].innerHTML);
+          y = parseFloat(rows[i + 1].getElementsByTagName("td")[column].innerHTML);
 
           if (x > y) {
             shouldSwitch = true;
