@@ -1,6 +1,9 @@
 library(tidyverse)
 library(sf)
 library(dplyr)
+library(leaflet)
+library(classInt)
+
 
 # Loading in 911 Calls data
 setwd("C:/Users/armvg/Desktop/CLASSES/2023-2024/FALL")
@@ -67,3 +70,20 @@ merged <- merged %>% select(-properties)
 
 # Export the new GEOJSON
 st_write(merged, "GEOG 328/GEOG328-group10_final/assets/PCI.geojson", delete_layer = TRUE)
+
+# -----------------------------------------------------------------------------
+
+# Finding PCI Natural Breaks
+
+# Minimum
+
+min <- min(merged$PCIAdjusted)
+
+# Maximum 
+
+max <- max(merged$PCIAdjusted)
+
+# Natural Breaks Scheme
+intervals <- classIntervals(merged$PCIAdjusted, n = 5, style = "jenks")
+breaks <- intervals$brks
+cat("Class Breaks:", breaks, "\n")
